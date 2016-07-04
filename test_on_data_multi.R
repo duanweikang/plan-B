@@ -121,3 +121,17 @@ for(i in 1:944){
   }
 }
 
+##### bat #####
+bat = read.table("bat.txt",header=T)
+
+#str(bat)
+new_bat = bat[order(bat$temp),]
+failed = new_bat$failed
+p_bat = manysteps2(y=failed,m=3,k=5,R=1e3)[[2]]
+dat = as.data.frame(cbind(p_bat,new_bat$temp))
+colnames(dat) = c('Probability','Temp')
+###plot for np method
+plt_bat = ggplot(data=dat,aes(x=Temp,y=Probability))
+plt_bat = plt_bat+geom_line(alpha=1/2,size=4)
+plt_bat = plt_bat+labs(x='Temperature')+labs(y='Probability
+
