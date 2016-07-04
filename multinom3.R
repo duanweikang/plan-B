@@ -25,30 +25,6 @@ getpartition = function(m,k,n){
   }
 }
 
-library(partitions
-        )
-prob = function(v){
-  return(sum(v)/prod(v))
-}
-
-mrprob = function(y){
-  w = apply(y,1,sum)
-  length = dim(y)[2]
-  category = dim(y)[1]
-  count = sum(w==0)
-  if((category-count)==1){
-    return(1)
-  }
-  else{
-    # kth stage
-    k_category = category - count
-    w = w[!w %in% c(0)]
-    comb = compositions(length,k_category,include.zero=F)
-    sums = sum(apply(comb,2,sum))
-    return(prob(w)/sums)
-  }
-}
-
 
 # getszinfo will take the partition result and data as input
 # the function will return two elements
@@ -66,8 +42,15 @@ getszinfo_multinom = function(sz,y,ct){
       tysz[j,i] = sum(y[j,(dd[i]+1):dd[i+1]])
     }
   }
+  p = matrix(rep(0,ct*k),nrow=ct,ncol=k)
   for(i in 1:k){
-    lgprb = c(lgprb,log(mrprob(y[,(dd[i]+1):dd[i+1]])))
+    for(j in 1:ct){
+      p[j,i] = tysz[j,i]/sz[i]
+    }
+  }
+  
+  for(i in 1:k){
+    lgprb = c(lgprb,dmultinom(tysz[,i],sz[i],p[,i],log=TRUE))
   }
   return(list(tysz,lgprb))
 }
