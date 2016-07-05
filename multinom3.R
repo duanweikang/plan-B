@@ -25,12 +25,15 @@ getpartition = function(m,k,n){
   }
 }
 
-library(partitions
-        )
+# load required package
+library(partitions)
+
+
 prob = function(v){
   return(sum(v)/prod(v))
 }
 
+# function for calculating marginal probability
 mrprob = function(y){
   w = apply(y,1,sum)
   length = dim(y)[2]
