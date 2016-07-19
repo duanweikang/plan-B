@@ -344,18 +344,16 @@ sim_multilogit_linear = function(n,reps = 1e3){
     # prepare data
     response = rep(0,n)
     for(i in 1:n){
-      c = 0
       for(j in 1:3){
         if(y[j,i] == 1)
-          c = j
-      }
-      response[i] = c
+          response[i] = j
+      }     
     }
     
     response = as.factor(response)
     predictor = seq(1,n)
     m = multinom(response~predictor)
-    prob = predict(model,newdata=x,'probs')
+    prob = predict(m,newdata=x,'probs')
     est.prob = rbind(prob[,1],prob[,2],prob[,3])    
     if(dim(est.prob)[1] == 3){
       Err[r] = get_error(y1=p,y2=est.prob)
