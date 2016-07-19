@@ -6,7 +6,7 @@
 ################################################################
 
 
-############# irregular data ####################
+############# nonlinear data ####################
 
 generate_multinom = function(n){
   # generate 3 by n category multinomial data
@@ -207,12 +207,10 @@ sim_multilogit = function(n,reps=1e3){
     # prepare data
     response = rep(0,n)
     for(i in 1:n){
-      c = 0
       for(j in 1:3){
         if(y[j,i] == 1)
-          c = j
+          response[i]=j
       }
-      response[i] = c
     }
     
     # data
@@ -222,19 +220,11 @@ sim_multilogit = function(n,reps=1e3){
     # train model
     library(nnet)
     mod = multinom(response~x1)
-    betahat.matrix = coef(mod)
-
-    if(dim(betahat.matrix)[1] == 2){
-      # est p
-      prob = predict(model,newdata=x,'probs')
-      est.prob = rbind(prob[,1],prob[,2],prob[,3])  
-      Err[r] = get_error(y1=p,y2=est.prob)
-    }
-    else{
-      Err[r] = 0
-      c = c+1
-    }
     
+    # est p
+    prob = predict(mod,newdata=x1,'probs')
+    est.prob = rbind(prob[,1],prob[,2],prob[,3])  
+    Err[r] = get_error(y1=p,y2=est.prob)    
     }
     
     return(sum(Err)/(reps-c))
@@ -266,30 +256,16 @@ sim_multilogit_square = function(n,reps=1e3){
     x1 = seq(1,n,1)
     x0 = rep(1,n)
     x2 = x1^2
-    x = rbind(x0,x1,x2)
-    
+    x = cbind(x1,x2)
     # train model
     library(nnet)
     mod = multinom(response~x1+x2)
-    betahat.matrix = rbind(coef(mod),0)
     
-    if(dim(betahat.matrix)[1] == 3){
-      # est p
-      est.prob = matrix(NA,3,n)
-      foo1 = exp(betahat.matrix%*%x)
-      foo2 = colSums(foo1)
-      for(i in 1:3){
-        for(j in 1:n){
-          est.prob[i,j] = foo1[i,j]/foo2[j]
-        }
-      }
-      Err[r] = get_error_multinom(y1=p,y2=est.prob)
-    }
-    else{
-      Err[r] = 0
-      c = c+1
-    }
     
+    # est p
+    prob = predict(mod,newdata=x,'probs')
+    est.prob = rbind(prob[,1],prob[,2],prob[,3])  
+    Err[r] = get_error(y1=p,y2=est.prob) 
   }
   
   return(sum(Err)/(reps-c))
@@ -299,8 +275,8 @@ sim_multilogit_square = function(n,reps=1e3){
 #### simulate and comparison ####
 
 ### simulate multi logit ##
-sim_multilogit(n=100,reps=1e3)
-sim_multilogit_square(n=100,reps=1e3)
+sim_multilogit(n=100,reps=1e2)
+sim_multilogit_square(n=100,reps=1e2)
 
 ### simulate nonparametric and compare with multi logit ###
 ## compare different k
@@ -403,21 +379,18 @@ sim_multilogit_linear(n=100,reps=1e3)
 ### simulate nonparametric and compare with multi logit ###
 
 # for m = 3
-sim_nonparametric_multinom_linear(N=100,M=3,K=13,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=3,K=10,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=3,K=8,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=3,K=5,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=3,K=3,reps=1e2)
 
 # for m = 5
-sim_nonparametric_multinom_linear(N=100,M=5,K=13,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=5,K=10,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=5,K=8,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=5,K=5,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=5,K=3,reps=1e2)
 
 # for m = 7
-sim_nonparametric_multinom_linear(N=100,M=7,K=13,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=7,K=10,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=7,K=8,reps=1e2)
 sim_nonparametric_multinom_linear(N=100,M=7,K=5,reps=1e2)
