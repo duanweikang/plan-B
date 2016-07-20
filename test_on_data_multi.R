@@ -34,13 +34,43 @@ for(i in 1:n){
 }
 
 # estimate
-p_np = manysteps_multinom(y=dat,m=5,k=37,R=1e3,ct=3)
+p_np = manysteps_multinom(y=dat,m=20,k=10,R=1e3,ct=3)
 
 ############ logistic regression ###############
 mod = multinom(pid~income,data=nes)
 summary(mod)
 p_multi = predict(mod,newdata=data.frame(nes[,3]),type='probs')
 
+
+##### plot of data ####
+#### prepare data
+republican = rep(0,944)
+democrat = rep(0,944)
+independent = rep(0,944)
+for(i in 1:944){
+  if(new_nes$pid[i]=='republican'){
+    republican[i]=1
+  }
+  else if(new_nes$pid[i]=='democrat'){
+    democrat[i]=1
+  }
+  else{
+    independent[i]=1
+  }
+}
+republican = cbind(seq(1,944),rep('republican'),republican)
+democrat = cbind(seq(1,944),rep('democrat'),democrat)
+independent = cbind(seq(1,944),rep('independent'),independent)
+nes_data = as.data.frame(rbind(republican,democrat,independent))
+names(nes_data) = c('income_order','category','pid')
+nes_data$pid = as.numeric(as.character(nes_data$pid))
+nes_data$income_order = as.numeric(as.character(nes_data$income_order))
+
+#### plot data
+plt_data = ggplot(data=nes_data,aes(x=income_order,y=pid))
+plt_data = plt_data+geom_point(aes(color=category),size=3,alpha=2/3)+facet_grid(category~.)
+plt_data = plt_data+scale_color_manual(values=c('#3366ff','#00cc66','#ff3366'))
+plt_data
 
 ### merge the probability together for comparison ###
 republican_np = cbind(seq(1,944,1),rep('republican',944),p_np[[2]][1,])
@@ -120,4 +150,6 @@ for(i in 1:944){
     error_np = error_np+1
   }
 }
+
+
 
