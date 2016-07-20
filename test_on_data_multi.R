@@ -42,6 +42,26 @@ summary(mod)
 p_multi = predict(mod,newdata=data.frame(nes[,3]),type='probs')
 
 
+### form data for plotting ###
+income = rep(nes[,3],3)
+probability = as.numeric(rbind(as.matrix(p_multi[,1]),as.matrix(p_multi[,2]),as.matrix(p_multi[,3])))
+pid = rbind(as.matrix(rep('democrat',944)),as.matrix(rep('independent',944)),as.matrix(rep('republican',944)))
+pred_data = cbind(income,probability,pid)
+pred_data = as.data.frame(pred_data)
+names(pred_data) = c('income','prob','pid')
+pred_data$income = as.numeric(as.character(pred_data$income))
+pred_data$prob = as.numeric(as.character(pred_data$prob))
+str(pred_data)
+
+
+library(ggplot2)
+plt_linear = ggplot(data=pred_data,aes(x=income,y=prob))
+plt_linear = plt_linear+geom_line(aes(color=pid),alpha=1/2,size=2)+scale_color_manual(values=c('#3366ff','#00cc66','#ff3366'))+facet_grid(pid~.)
+plt_linear = plt_linear+labs(title='Estimation of Probability on Political ID by GLM')
+plt_linear = plt_linear+labs(x='Income')+labs(y='Probability')
+plt_linear
+
+
 ##### plot of data ####
 #### prepare data
 republican = rep(0,944)
@@ -105,7 +125,7 @@ plt_np = plt_np+labs(title='Estimation of Probability on Political ID by Nonpara
 plt_np = plt_np+labs(x='Income_order')+labs(y='Probability')
 plt_np
 
-###plot for nonparametric method
+###plot for linear method
 plt_multi = ggplot(data=df_multi,aes(x=income_order,y=probability))
 plt_multi = plt_multi+geom_line(aes(color=pid),alpha=1/2,size=2)+scale_color_manual(values=c('#3366ff','#00cc66','#ff3366'))+facet_grid(pid~.)
 plt_multi = plt_multi+labs(title='Estimation of Probability on Political ID by Multi logit model')
